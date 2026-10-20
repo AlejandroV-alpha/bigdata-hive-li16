@@ -1,36 +1,33 @@
+
 @echo off
+setlocal
+
 echo ==============================================
-echo  Despliegue de Cluster Hadoop HDFS - Grupo 04
+echo  Despliegue de Hadoop HDFS - Practica LI16
 echo ==============================================
 
-rem 1. Crear red virtual de Docker si no existe
-docker network inspect hadoop_network >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [+] Creando red virtual hadoop_network...
-    docker network create hadoop_network
-) else (
-    echo [*] Red virtual hadoop_network ya existe.
-)
+rem 1. Construir imagen base de Hadoop
+echo [+] Construyendo imagen base Hadoop 3.3.6...
+docker build -t hadoop-li16-base:3.3.6 .
 
-rem 2. Construir imagen base de Hadoop 3.3.6
-echo [+] Construyendo imagen base hadoop-base:3.3.6...
-docker build -t hadoop-base:3.3.6 .
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo [!] Error al construir la imagen base.
-    pause
-    exit /b %errorlevel%
+    exit /b 1
 )
 
-rem 3. Levantar servicios con Docker Compose
+rem 2. Levantar servicios con Docker Compose
 echo [+] Levantando servicios del cluster...
 docker compose up -d
-if %errorlevel% neq 0 (
-    docker-compose up -d
+
+if errorlevel 1 (
+    echo [!] Error al levantar los servicios.
+    exit /b 1
 )
 
 echo ==============================================
-echo Cluster iniciado con exito.
-echo NameNode Web UI: http://localhost:9870
-echo YARN ResourceManager: http://localhost:8089
+echo Cluster Hadoop LI16 iniciado correctamente.
+echo NameNode Web UI: http://localhost:9871
+echo YARN ResourceManager: http://localhost:8090
 echo ==============================================
-pause
+
+endlocal

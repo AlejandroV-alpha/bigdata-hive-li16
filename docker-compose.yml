@@ -1,7 +1,6 @@
 services:
   namenode:
     build: ./namenode
-    container_name: namenode
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - ./data/:/hadoop-data/input
@@ -9,14 +8,13 @@ services:
     environment:
       - CLUSTER_NAME=test
     ports:
-      - "9870:9870"
-      - "8020:8020"
+      - "9871:9870"
+      - "8021:8020"
     networks:
       - hadoop_network
 
   resourcemanager:
     build: ./resourcemanager
-    container_name: resourcemanager
     restart: on-failure
     depends_on:
       - namenode
@@ -24,13 +22,12 @@ services:
       - datanode2
       - datanode3
     ports:
-      - "8089:8088"
+      - "8090:8088"
     networks:
       - hadoop_network
 
   historyserver:
     build: ./historyserver
-    container_name: historyserver
     depends_on:
       - namenode
       - datanode1
@@ -38,25 +35,23 @@ services:
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
     ports:
-      - "8188:8188"
+      - "8189:8188"
     networks:
       - hadoop_network
 
   nodemanager1:
     build: ./nodemanager
-    container_name: nodemanager1
     depends_on:
       - namenode
       - datanode1
       - datanode2
     ports:
-      - "8042:8042"
+      - "8043:8042"
     networks:
       - hadoop_network
 
   datanode1:
     build: ./datanode
-    container_name: datanode1
     depends_on:
       - namenode
     volumes:
@@ -66,7 +61,6 @@ services:
 
   datanode2:
     build: ./datanode
-    container_name: datanode2
     depends_on:
       - namenode
     volumes:
@@ -76,7 +70,6 @@ services:
 
   datanode3:
     build: ./datanode
-    container_name: datanode3
     depends_on:
       - namenode
     volumes:
@@ -93,5 +86,3 @@ volumes:
 
 networks:
   hadoop_network:
-    name: hadoop_network
-    external: true

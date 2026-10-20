@@ -1,4 +1,4 @@
-FROM hadoop-base:3.3.6
+FROM hadoop-li16-base:3.3.6
 
 HEALTHCHECK CMD curl -f http://localhost:9870/ || exit 1
 
