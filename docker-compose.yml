@@ -77,12 +77,76 @@ services:
     networks:
       - hadoop_network
 
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${HIVE_DB_NAME}
+      POSTGRES_USER: ${HIVE_DB_USER}
+      POSTGRES_PASSWORD: ${HIVE_DB_PASSWORD}
+    volumes:
+      - hive_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks:
+      - hadoop_network
+
+  metastore:
+    image: apache/hive:4.0.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      namenode:
+        condition: service_started
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      HIVE_CUSTOM_CONF_DIR: /hive_custom_conf
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/${HIVE_DB_NAME}
+        -Djavax.jdo.option.ConnectionUserName=${HIVE_DB_USER}
+        -Djavax.jdo.option.ConnectionPassword=${HIVE_DB_PASSWORD}
+    volumes:
+      - ./hive/conf:/hive_custom_conf:ro
+      - ./drivers/postgresql-42.7.14.jar:/opt/hive/lib/postgres.jar:ro
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9083"]
+      start_period: 90s
+      interval: 10s
+      timeout: 5s
+      retries: 24
+    networks:
+      - hadoop_network
+
+  hiveserver2:
+    image: apache/hive:4.0.1
+    depends_on:
+      metastore:
+        condition: service_healthy
+    environment:
+      SERVICE_NAME: hiveserver2
+      IS_RESUME: "true"
+      HIVE_CUSTOM_CONF_DIR: /hive_custom_conf
+      SERVICE_OPTS: >-
+        -Dhive.metastore.uris=thrift://metastore:9083
+    volumes:
+      - ./hive/conf:/hive_custom_conf:ro
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    networks:
+      - hadoop_network
+
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
   hadoop_datanode2:
   hadoop_datanode3:
   hadoop_historyserver:
+  hive_postgres_data:
 
 networks:
   hadoop_network:

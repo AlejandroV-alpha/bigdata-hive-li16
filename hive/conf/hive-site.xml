@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+        <description>
+            Directorio principal de almacenamiento de Hive en HDFS.
+        </description>
+    </property>
+
+    <property>
+        <name>hive.metastore.event.db.notification.api.auth</name>
+        <value>false</value>
+        <description>
+            Desactiva la autorizacion de las API de notificaciones
+            del Metastore para el entorno de laboratorio.
+        </description>
+    </property>
+
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+        <description>
+            Ejecuta las consultas con el usuario del servicio HiveServer2
+            sin suplantar al usuario conectado.
+        </description>
+    </property>
+</configuration>
