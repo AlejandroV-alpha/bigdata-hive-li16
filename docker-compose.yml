@@ -86,7 +86,8 @@ services:
     volumes:
       - hive_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 10s
       timeout: 5s
       retries: 15
@@ -130,10 +131,13 @@ services:
       SERVICE_NAME: hiveserver2
       IS_RESUME: "true"
       HIVE_CUSTOM_CONF_DIR: /hive_custom_conf
+      HIVESERVER2_PID_DIR: /run/hiveserver2
       SERVICE_OPTS: >-
         -Dhive.metastore.uris=thrift://metastore:9083
     volumes:
       - ./hive/conf:/hive_custom_conf:ro
+    tmpfs:
+      - /run/hiveserver2:mode=0700,uid=1000,gid=1000
     ports:
       - "10000:10000"
       - "10002:10002"
